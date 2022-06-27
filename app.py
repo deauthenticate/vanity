@@ -260,6 +260,10 @@ async def inv(ctx):
 @commands.cooldown(1, 10, commands.BucketType.user)
 @has_permissions(administrator=True)
 async def settings(ctx):
+  boost = ctx.guild.premium_subscription_count
+    if boost < 14:
+      await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
+      return
   vanityy = load_db()
   if str(ctx.guild.id) not in vanityy:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
@@ -488,6 +492,10 @@ async def status(ctx, user:discord.Member=None):
 async def set(ctx):
   if ctx.message.author.id in blacklisted:
     return
+  boost = ctx.guild.premium_subscription_count
+    if boost < 14:
+      await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
+      return
   try:
     vx = ctx.guild.vanity_url_code
   except:
@@ -513,6 +521,10 @@ async def set(ctx):
 @commands.cooldown(1, 60, commands.BucketType.user) 
 @has_permissions(administrator=True)
 async def reset(ctx):
+  boost = ctx.guild.premium_subscription_count
+    if boost < 14:
+      await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
+      return
   vanity = load_db()
   if str(ctx.guild.id) not in vanity:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
@@ -621,6 +633,10 @@ async def message(ctx, *message):
 @commands.guild_only()
 @has_permissions(administrator=True)
 async def setup(ctx):
+  boost = ctx.guild.premium_subscription_count
+    if boost < 14:
+      await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
+      return
   vanity = load_db()
   if str(ctx.guild.id) not in vanity:
     em = discord.Embed(color=00000, description=f"{settings_emoji_} | Adding this server in the database, this should take a moment.")
