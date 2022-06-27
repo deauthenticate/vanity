@@ -513,11 +513,11 @@ async def set(ctx):
 @commands.cooldown(1, 60, commands.BucketType.user) 
 @has_permissions(administrator=True)
 async def reset(ctx):
-  vanityy = load_db()
-  if str(ctx.guild.id) not in vanityy:
+  vanity = load_db()
+  if str(ctx.guild.id) not in vanity:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
     return
-  if str(ctx.guild.id) in vanity:
+  elif str(ctx.guild.id) in vanity:
     vanity[str(ctx.guild.id)] = ""
     vanity[str(f'{ctx.guild.id}role')] = ""
     vanity[str(f'{ctx.guild.id}trigger')] = ""
@@ -621,8 +621,8 @@ async def message(ctx, *message):
 @commands.guild_only()
 @has_permissions(administrator=True)
 async def setup(ctx):
-  vanityy = load_db()
-  if str(ctx.guild.id) not in vanityy:
+  vanity = load_db()
+  if str(ctx.guild.id) not in vanity:
     em = discord.Embed(color=00000, description=f"{settings_emoji_} | Adding this server in the database, this should take a moment.")
     await ctx.reply(embed=em, mention_author=False)
     vanity[str(ctx.guild.id)] = ""
