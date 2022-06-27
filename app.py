@@ -261,7 +261,7 @@ async def inv(ctx):
 @has_permissions(administrator=True)
 async def settings(ctx):
   boost = ctx.guild.premium_subscription_count
-    if boost < 14:
+  if boost < 14:
       await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
       return
   vanityy = load_db()
@@ -493,7 +493,7 @@ async def set(ctx):
   if ctx.message.author.id in blacklisted:
     return
   boost = ctx.guild.premium_subscription_count
-    if boost < 14:
+  if boost < 14:
       await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
       return
   try:
@@ -522,7 +522,7 @@ async def set(ctx):
 @has_permissions(administrator=True)
 async def reset(ctx):
   boost = ctx.guild.premium_subscription_count
-    if boost < 14:
+  if boost < 14:
       await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
       return
   vanity = load_db()
@@ -634,7 +634,7 @@ async def message(ctx, *message):
 @has_permissions(administrator=True)
 async def setup(ctx):
   boost = ctx.guild.premium_subscription_count
-    if boost < 14:
+  if boost < 14:
       await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
       return
   vanity = load_db()
