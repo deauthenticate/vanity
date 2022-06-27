@@ -532,10 +532,10 @@ async def reset(ctx):
   return
 @set.group()
 async def trigger(ctx, vanity=None):
-  if vanityy == None:
+  if vanity == None:
     return
   vanityy = load_db()
-  if str(ctx.guild.id) not in vanity:
+  if str(ctx.guild.id) not in vanityy:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
     return
   vanityf = load_db()
