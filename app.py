@@ -645,9 +645,14 @@ async def on_message(m):
     em = discord.Embed(color=00000, description=f"{settings_emoji_} | Prefix : `.`") 
     await m.reply(embed=em, mention_author=False)
 
-  elif "vanity" in str(m.content):
-    react = load_react(m.guild.id)
-    await m.reply(react, mention_author=False)
+  elif "vanity" in str(m.content): 
+    if m.author.bot or "https://" in str(m.content) or "http://" in str(m.content):
+        return
+    try:
+        react = load_react(m.guild.id)
+        await m.reply(react, mention_author=False)
+    except:
+        return
 
     
 @client.event
