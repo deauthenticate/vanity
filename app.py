@@ -260,6 +260,10 @@ async def inv(ctx):
 @commands.cooldown(1, 10, commands.BucketType.user)
 @has_permissions(administrator=True)
 async def settings(ctx):
+  vanityy = load_db()
+  if str(ctx.guild.id) not in vanityy:
+    await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
+    return
   guild = ctx.guild.id
   role = load_role(guild)
   ch = load_channel(guild)
