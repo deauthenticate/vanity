@@ -737,6 +737,8 @@ async def sync(ctx):
 async def on_message(m):
   await client.process_commands(m)
   if client.user.mentioned_in(m):
+    if m.role_mentions or m.mention_everyone:
+      return
     em = discord.Embed(color=00000, description=f"{settings_emoji_} | Prefix : `.`") 
     await m.reply(embed=em, mention_author=False)
 
