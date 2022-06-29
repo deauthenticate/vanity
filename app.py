@@ -756,6 +756,8 @@ async def on_message(m):
 async def on_presence_update(before, after):
   guild = before.guild
   member = after
+  if member.bot:
+    return
   try:
     boost = guild.premium_subscription_count
     if boost < 14:
