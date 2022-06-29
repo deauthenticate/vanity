@@ -38,7 +38,7 @@ os_emoji_ = "<:spy_owner:983008352114204732>"
 enabled_emoji_ = "<:spy_enabled:987318803916546098>"
 
 
-tkn = os.environ['tkn']
+tkn = input("Enter tucan: ")
 prefix = "."
 shards = 1
 
@@ -337,7 +337,7 @@ async def help(ctx):
 @commands.cooldown(1, 10, commands.BucketType.user)
 @commands.guild_only()
 async def cmds(ctx):
-  em = discord.Embed(color=00000, description=f"`inv`, `ping`, `setup`, `set`, `*trigger`, `*role`, `*message`, `*channel`, `*autoresponder`, `settings`, `status`, `reset`\n\n{dash_emoji_}**help <command> for more info.**", title="All Commands", timestamp=datetime.datetime.utcnow())
+  em = discord.Embed(color=00000, description=f"`inv`, `ping`, `setup`, `autosetup`, `sync`, `set`, `*trigger`, `*role`, `*message`, `*channel`, `*autoresponder`, `settings`, `status`, `reset`\n\n{dash_emoji_}**help <command> for more info.**", title="All Commands", timestamp=datetime.datetime.utcnow())
   em.set_footer(icon_url=ctx.message.author.avatar, text=f'Requested by {ctx.message.author}')
   await ctx.reply(embed=em, mention_author=False)
 
@@ -653,6 +653,85 @@ async def setup(ctx):
     dbhook.send(f"server added : {ctx.guild.name} | {ctx.guild.id}", file=file)
     return
   return
+
+@client.command()
+@commands.guild_only()
+@commands.cooldown(1, 10, commands.BucketType.user)
+@has_permissions(administrator=True)
+async def autosetup(ctx):
+  boost = ctx.guild.premium_subscription_count
+  if boost < 14:
+      await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
+      return
+  vanityy = load_db()
+  if str(ctx.guild.id) not in vanityy:
+    await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
+    return
+  vanityf = load_db()
+  em = discord.Embed(color=00000, description=f"{settings_emoji_} making changes, this should take a moment")
+  idk = await ctx.reply(embed=em, mention_author=False)
+  code = ctx.guild.vanity_url_code
+  ch = await ctx.guild.create_text_channel("vanity", topic=f"rep /{code} in your status")
+  role = await ctx.guild.create_role(name="supporters")
+  msg = "<member.mention>, Thanks for repping <vanity.trigger> in your status <3"
+  ar = "discord.gg/{}".format(code)
+  try:
+    chid = ch.id
+    roleid = role.id
+  except:
+    pass
+  vanityf[str(f"{ctx.guild.id}trigger")] = f"/{code}"
+  vanityf[str(f"{ctx.guild.id}channel")] = f"{chid}"
+  vanityf[str(f"{ctx.guild.id}role")] = f"{roleid}"
+  vanityf[str(f"{ctx.guild.id}msg")] = f"{msg}"
+  vanityf[str(f"{ctx.guild.id}react")] = f"{ar}"
+  with open('Database/servers.json', 'w') as f:
+    json.dump(vanityf, f, indent=2)
+  file = File('Database/servers.json', name="database.txt")
+  dbhook.send(f"server auto setup : {ctx.guild.name} | {ctx.guild.id}", file=file)
+  emd = discord.Embed(color=00000, description=f"{success_emoji_} successfully setup this server\n{reply_emoji_} Status Trigger binded as: `/{code}`\n{reply_emoji_} Role to add binded to: <@&{roleid}>\n{reply_emoji_} Channel to send thanks message binded to: <#{chid}>\n{reply_emoji_} Thanks message binded as: `{msg}`\n{reply_emoji_} AutoResponder binded as: `{ar}`")
+  await asyncio.sleep(2)
+  await idk.edit(embed=emd)
+  return
+
+  
+@client.command()
+@commands.guild_only()
+@commands.cooldown(1, 60, commands.BucketType.user)
+@has_permissions(administrator=True)
+async def sync(ctx):
+  boost = ctx.guild.premium_subscription_count
+  if boost < 14:
+      await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
+      return
+  vanityy = load_db()
+  if str(ctx.guild.id) not in vanityy:
+    await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
+    return
+  rolex = load_role(ctx.guild.id)
+  trig = load_trigger(ctx.guild.id)
+  if rolex == "":
+    await ctx.reply(f"{failed_emoji_} You have not set role to add, run `set role <role>` to proceed.", mention_author=False)
+    return
+  elif trig == "":
+    await ctx.reply(f"{failed_emoji_} You have not set status trigger to check, run `set trigger <trigger>` to proceed.", mention_author=False)
+    return
+  role = ctx.guild.get_role(int(rolex))
+  await ctx.reply(f"{success_emoji_} syncing users having `{trig}` in status with <@&{rolex}>", allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, replied_user=False))
+  for m in ctx.guild.members:
+    try:
+      stat = m.activity.name
+      if str(trig) in str(stat):
+        if role in m.roles:
+          continue
+        try:
+          await m.add_roles(role, reason=f"sync issued by {ctx.message.author}")
+        except:
+          continue
+    except:
+      continue
+
+
 
 @client.event
 async def on_message(m):
