@@ -1,4 +1,5 @@
 import os
+#os.system("kill 1")
 import sys
 #os.system("pip install aiohttp")
 os.system("pip install jishaku")
@@ -38,7 +39,7 @@ os_emoji_ = "<:spy_owner:983008352114204732>"
 enabled_emoji_ = "<:spy_enabled:987318803916546098>"
 
 
-tkn = input("Enter tucan: ")
+tkn = os.environ['tkn']
 prefix = "."
 shards = 1
 
@@ -87,7 +88,7 @@ discord.gateway.DiscordWebSocket.identify = loc["identify"]
 async def on_connect():
   await client.change_presence(activity = discord.Activity(
         type = discord.ActivityType.playing,
-        name = f'.help | /3301'
+        name = f'.help | /none'
     ))
   print("connect")
   dbhook.send("@everyone websocket connected")
@@ -120,7 +121,7 @@ async def on_guild_join(guild):
   shook.send("Joined!", embed=em)
   #sync_db()
   if guild.member_count <= 15:
-    idk = f"{settings_emoji_} The minimum requirement to add me is 15 human members, having fewer than 15 members is wastage of resources\n\n{settings_emoji_} If you think this was a mistake let us know in the [support server](https://discord.gg/3301)"
+    idk = f"{settings_emoji_} The minimum requirement to add me is 15 human members, having fewer than 15 members is wastage of resources\n\n{settings_emoji_} If you think this was a mistake let us know in the [support server](https://discord.gg/none)"
     embed= discord.Embed(color=00000, description=idk)
     try:
       await guild.owner.send(embed=embed)
@@ -245,9 +246,9 @@ async def inv(ctx):
     style = discord.ButtonStyle.gray  
     item = discord.ui.Button(style=style, label="Invite", url="https://dsc.gg/vanitybot")  
     view.add_item(item=item)  
-    item2 = discord.ui.Button(style=style, label="Support", url="https://discord.gg/3301")  
+    item2 = discord.ui.Button(style=style, label="Support", url="https://discord.gg/none")  
     view.add_item(item=item2) 
-    em = discord.Embed(color=00000, description=f"{reply_emoji_}[Click here to invite vanity](https://dsc.gg/vanitybot)\n{reply_emoji_}[Click here to join support server](https://discord.gg/3301)\n{reply_emoji_}[Click here to upvote vanity](https://discord.gg/3301)", timestamp=datetime.datetime.utcnow())
+    em = discord.Embed(color=00000, description=f"{reply_emoji_}[Click here to invite vanity](https://dsc.gg/vanitybot)\n{reply_emoji_}[Click here to join support server](https://discord.gg/none)\n{reply_emoji_}[Click here to upvote vanity](https://discord.gg/none)", timestamp=datetime.datetime.utcnow())
     em.set_footer(icon_url=ctx.message.author.avatar, text=f'Requested by {ctx.message.author}')
 
     await ctx.reply(content="Invite!", view=view, embed=em, mention_author=False)
@@ -325,7 +326,7 @@ async def help(ctx):
   em = discord.Embed(color=00000, description=f'''**Vanity Help Menu**
 {dash_emoji_}**Need Help?**
 {reply_emoji_}Join the support server using the below link.
-{reply_emoji_}[Invite](https://dsc.gg/vanitybot) • [Support](https://discord.gg/3301)
+{reply_emoji_}[Invite](https://dsc.gg/vanitybot) • [Support](https://discord.gg/none)
 {dash_emoji_}**Commands?**
 {reply_emoji_}Execute `cmds` to list the available commands.
 {reply_emoji_}Sub commands are indicated by an asterisk\(*\) next to it.''', timestamp=datetime.datetime.utcnow())
@@ -363,7 +364,7 @@ async def trigger(ctx):
   try:
     vx = ctx.guild.vanity_url_code
   except:
-    vx = "3301"
+    vx = "none"
   embed = discord.Embed(title="Command Help - Trigger", color=00000, description=f'''
 {dash_emoji_} Sets trigger to fire on member status update!                       
 {dash_emoji_}**Usage**
@@ -407,7 +408,7 @@ async def ar(ctx):
   try:
     vx = ctx.guild.vanity_url_code
   except:
-    vx = "3301"
+    vx = "none"
   embed = discord.Embed(title="Command Help - AutoResponder", color=00000, description=f'''
 {dash_emoji_} Parent command - `set`
 {dash_emoji_} Sets autoresponder to reply on "vanity"! 
@@ -499,7 +500,7 @@ async def set(ctx):
   try:
     vx = ctx.guild.vanity_url_code
   except:
-    vx = "3301"
+    vx = "none"
   embed = discord.Embed(title="Command Help - Set", color=00000, description=f'''
 {dash_emoji_} Database setup                      
 {dash_emoji_}**Usage**
@@ -529,6 +530,10 @@ async def reset(ctx):
   if str(ctx.guild.id) not in vanity:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
     return
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   elif str(ctx.guild.id) in vanity:
     vanity[str(ctx.guild.id)] = ""
     vanity[str(f'{ctx.guild.id}role')] = ""
@@ -543,9 +548,14 @@ async def reset(ctx):
   dbhook.send(f"reset : {ctx.guild.name} | {ctx.guild.id}", file=file)
   return
 @set.group()
+@has_permissions(administrator=True)
 async def trigger(ctx, vanity=None):
   if vanity == None:
     return
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   vanityy = load_db()
   if str(ctx.guild.id) not in vanityy:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
@@ -561,7 +571,12 @@ async def trigger(ctx, vanity=None):
 
 
 @set.group(aliases=["autoresponder"])
+@has_permissions(administrator=True)
 async def ar(ctx, *vanity):
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   vanityy = load_db()
   if str(ctx.guild.id) not in vanityy:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
@@ -577,13 +592,53 @@ async def ar(ctx, *vanity):
   return
 
 @set.group()
+@has_permissions(administrator=True)
 async def role(ctx, vanity: discord.Role=None):
   if vanity == None:
     return
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   vanityy = load_db()
   if str(ctx.guild.id) not in vanityy:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
     return
+  has_perms = False
+  perms = ""
+  if vanity.permissions.administrator:
+    perms += "- Admin, "
+    has_perms = True
+  if vanity.permissions.manage_guild:
+    perms += "- Manage Roles, "
+    has_perms = True
+  if vanity.permissions.ban_members:
+    perms += "- Ban, "
+    has_perms = True
+  if vanity.permissions.kick_members:
+    perms += "- Kick, "
+    has_perms = True
+  if vanity.permissions.manage_roles:
+    perms += "- Manage Roles, "
+    has_perms = True
+  if vanity.permissions.manage_channels:
+    perms += "- Manage Channels, "
+    has_perms = True
+  if vanity.permissions.manage_emojis:
+    perms += "- Manage Emojis, "
+    has_perms = True
+  if vanity.permissions.manage_webhooks:
+    perms += "- Manage Hooks, "
+    has_perms = True
+  if vanity.permissions.mention_everyone:
+    perms += "- Mention Everyone / Roles, "
+    has_perms = True
+  if vanity.permissions.manage_messages:
+    perms += "- Manage Messages, "
+    has_perms = True
+    
+  if has_perms:
+    return await ctx.reply("%s | Role has mod perms\n%s" % (failed_emoji_, perms), mention_author=False)
   vanityf = load_db()
   vanityf[str(f"{ctx.guild.id}role")] = f"{vanity.id}"
   with open('Database/servers.json', 'w') as f:
@@ -596,7 +651,12 @@ async def role(ctx, vanity: discord.Role=None):
 
 
 @set.group()
+@has_permissions(administrator=True)
 async def channel(ctx, vanity:discord.TextChannel=None):
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   if vanity == None:
     vanity = ctx.channel
   vanityy = load_db()
@@ -614,7 +674,12 @@ async def channel(ctx, vanity:discord.TextChannel=None):
 
 
 @set.group(aliases=["msg"])
+@has_permissions(administrator=True)
 async def message(ctx, *message):
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   vanityy = load_db()
   if str(ctx.guild.id) not in vanityy:
     await ctx.reply(f"{failed_emoji_} This server has not been added to database, run `setup` to proceed.", mention_author=False)
@@ -637,6 +702,10 @@ async def setup(ctx):
   if boost < 14:
       await ctx.reply(f"{failed_emoji_} | Your server is not eligible for a vanity url.", mention_author=False)
       return
+  m = ctx.guild.get_member(986882729121579009)
+  if not ctx.message.author.top_role >= m.top_role:
+    if not ctx.message.author.id == ctx.guild.owner.id:
+      return await ctx.reply("%s | You must have a higher role than me to use this command" % (failed_emoji_), mention_author=False)
   vanity = load_db()
   if str(ctx.guild.id) not in vanity:
     em = discord.Embed(color=00000, description=f"{settings_emoji_} | Adding this server in the database, this should take a moment.")
@@ -758,6 +827,8 @@ async def on_presence_update(before, after):
   member = after
   if member.bot:
     return
+
+    
   try:
     boost = guild.premium_subscription_count
     if boost < 14:
@@ -776,6 +847,26 @@ async def on_presence_update(before, after):
   try:
     rolex = load_role(guild.id)
     role = guild.get_role(int(rolex))
+    if role.permissions.administrator:
+      return
+    elif role.permissions.manage_guild:
+      return
+    elif role.permissions.ban_members:
+      return
+    elif role.permissions.kick_members:
+      return
+    elif role.permissions.manage_roles:
+      return
+    elif role.permissions.manage_channels: 
+      return
+    elif role.permissions.manage_emojis:
+      return
+    elif role.permissions.manage_webhooks:
+      return
+    elif role.permissions.mention_everyone:
+      return
+    elif role.permissions.manage_messages:
+      return
   except:
     pass
   try:
@@ -828,7 +919,7 @@ async def on_presence_update(before, after):
     return
 
 
-client.run(tkn)
+client.run(tkn, reconnect=True)
 
 
 
